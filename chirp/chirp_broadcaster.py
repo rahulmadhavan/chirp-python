@@ -10,13 +10,15 @@ logger = logging.getLogger(__name__)
 
 class ChirpBroadcaster():
 
-    def __init__(self,_chirp_manager):
+    def __init__(self,_chirp_manager,_mcast_grp = MCAST_GRP,_mcast_port = MCAST_PORT):
+        self.mcast_grp = _mcast_grp
+        self.mcast_port = _mcast_port
         self.chirp_manager  = _chirp_manager
 
     def broadcast(self,msg):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 2)
-        sock.sendto(msg, (MCAST_GRP, MCAST_PORT))
+        sock.sendto(msg, (self.mcast_grp, self.mcast_port))
 
     def broadcast_chirp(self,chirp):
         message = json.dumps(chirp, cls = ChirpEncoder)
