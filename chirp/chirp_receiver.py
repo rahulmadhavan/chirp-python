@@ -1,8 +1,12 @@
 import threading,socket,struct,time,json
 from chirp import ChirpDecoder
+from config import MCAST_GRP,MCAST_PORT
+import logging
 
-MCAST_GRP = '224.1.1.4'
-MCAST_PORT = 9292
+
+logger = logging.getLogger(__name__)
+
+
 
 
 class ChirpReceiver(threading.Thread):
@@ -14,7 +18,7 @@ class ChirpReceiver(threading.Thread):
         self.chirp_manager = _chirp_manager
 
     def run(self):
-        print "chirp listener about to listen to chirps"
+        logger.debug("chirp listener about to listen to chirps")
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind((MCAST_GRP, MCAST_PORT))
@@ -25,12 +29,9 @@ class ChirpReceiver(threading.Thread):
             msg = sock.recv(10240)
             try:
                 chirp = json.loads(msg,cls=ChirpDecoder)
+                self.chirp_manager.notify(chirp)
             except Exception as e:
-                print "---------------------------------"
-                print "message could not be interpreted"
-                print e.message
-                print "---------------------------------"
-            self.chirp_manager.notify(chirp)
+                logger.error("message could not be interpreted", exc_info=True)
             time.sleep(self._pause)
 
 

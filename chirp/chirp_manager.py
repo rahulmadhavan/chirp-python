@@ -1,16 +1,14 @@
 import json
 import time
 import threading
+import chirp_broadcaster, chirp_receiver
 from chirp import ChirpEncoder
-import chirp_broadcaster
-import chirp_receiver
+from config import _PUBlISH,_STOP,_DISCOVER
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-
-
-_PUBlISH = "PUBLISH"
-_STOP = "STOP"
-_DISCOVER = "DISCOVER"
 
 class ChirpManager():
 
@@ -45,7 +43,7 @@ class ChirpManager():
 
     def notify(self,chirp):
         if chirp.sender != self.name:
-            print str(threading.current_thread().ident) + ' notified -- ' + json.dumps(chirp,cls=ChirpEncoder)
+            logger.debug(str(threading.current_thread().ident) + ' notified -- ' + json.dumps(chirp,cls=ChirpEncoder))
             if chirp.method == _PUBlISH:
                 self.add_chirper(chirp)
             elif chirp.method == _STOP:
@@ -56,8 +54,8 @@ class ChirpManager():
                 elif chirp.name.strip() == self.name:
                     self.chirp_broadcaster.publish()
             else:
-                print "This bird doesn't know how to chirp"
-                print json.loads(chirp,cls=ChirpEncoder)
+                logger.error("This bird doesn't know how to chirp")
+                logger.error(json.loads(chirp,cls=ChirpEncoder))
 
 
     def stop(self):
@@ -76,18 +74,18 @@ class ChirpManager():
 
     def fetch(self,chirper_name):
         if chirper_name.strip() == self.name:
-            print 'fetching current chirper ' + chirper_name
+            logger.debug('fetching current chirper ' + chirper_name)
             return self.details()
         elif chirper_name in self.chirpers:
-            print 'fetching existing chirper ' + chirper_name
+            logger.debug('fetching existing chirper ' + chirper_name)
             return self.chirpers[chirper_name]
         else:
             self.chirp_broadcaster.discover(chirper_name)
-            print 'fetching chirper ' + chirper_name
+            logger.debug('fetching chirper ' + chirper_name)
             count = 10
             while count < 10:
                 if chirper_name in self.chirpers:
-                    print 'chirper found ' + chirper_name
+                    logger.debug('chirper found ' + chirper_name)
                     return self.chirpers[chirper_name]
                     return self.chirpers[chirper_name]
                 else:
@@ -101,18 +99,3 @@ class ChirpManager():
         self.chirp_broadcaster.discover()
 
 
-# def main():
-#     cm = ChirpManager(sys.argv[1],9200,'http','chirp.org')
-#     cm.start_chirping()
-#
-#     while True:
-#         try:
-#             time.sleep(10)
-#         except KeyboardInterrupt:
-#             cm.stop()
-#             break
-#
-#
-# if __name__ == '__main__':
-#     main()
-#

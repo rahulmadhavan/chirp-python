@@ -1,7 +1,20 @@
-from flask import Flask
-from chirp_manager import ChirpManager
+##########################################
+#
+#   example uses flask web framework
+#
+#   setup flask to run the example
+#
+#
+########################################
+
 import sys
 import json
+import logging
+
+from flask import Flask
+
+from chirp.chirp_manager import ChirpManager
+
 
 app = Flask("Chirpy")
 
@@ -36,6 +49,7 @@ def fetch_chirper(chirper_name):
 
 
 if __name__ == '__main__':
+    logging.basicConfig(filename = sys.argv[1]+'.log',level=logging.DEBUG)
     cm.start_chirping()
     app.run(port=int(sys.argv[2]))
 

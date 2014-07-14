@@ -2,14 +2,11 @@ import socket
 import json
 import threading
 from chirp import Chirp,ChirpEncoder
+from config import _PUBlISH,_STOP,_DISCOVER,MCAST_GRP,MCAST_PORT
+import logging
 
+logger = logging.getLogger(__name__)
 
-MCAST_GRP = '224.1.1.4'
-MCAST_PORT = 9292
-
-_PUBlISH = "PUBLISH"
-_STOP = "STOP"
-_DISCOVER = "DISCOVER"
 
 class ChirpBroadcaster():
 
@@ -39,7 +36,7 @@ class ChirpBroadcaster():
 
     def discover(self,name = ''):
         chirp = Chirp(_DISCOVER,name,_sender= self.chirp_manager.name)
-        print str(threading.current_thread().ident) + ' broadcasting --  '+ json.dumps(chirp, cls = ChirpEncoder)
+        logger.debug(str(threading.current_thread().ident) + ' broadcasting --  '+ json.dumps(chirp, cls = ChirpEncoder))
         self.broadcast_chirp(chirp)
 
 
